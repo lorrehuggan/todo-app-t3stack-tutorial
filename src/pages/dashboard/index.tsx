@@ -1,27 +1,31 @@
-import { GetServerSideProps } from "next";
-import { signOut, useSession } from "next-auth/react";
-import React from "react";
-import Button from "../../components/ui/button";
-import { trpc } from "../../utils/trpc";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { CheckIcon } from "@heroicons/react/24/solid";
-import Head from "next/head";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { CreateTodo } from "../../server/trpc/router/todo";
-import { createTodo } from "../../utils/schema";
-import Todo from "../../components/todo";
+import { GetServerSideProps } from 'next';
+import { signOut, useSession } from 'next-auth/react';
+import React from 'react';
+import Button from '../../components/ui/button';
+import { trpc } from '../../utils/trpc';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { CheckIcon } from '@heroicons/react/24/solid';
+import Head from 'next/head';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { CreateTodo } from '../../server/trpc/router/todo';
+import { createTodo } from '../../utils/schema';
+import Todo from '../../components/todo';
 
 const Dashboard: React.FC = () => {
   const utils = trpc.useContext();
   const { data: sessionData } = useSession();
-  const { data: userData, isLoading } = trpc.example.getUser.useQuery(
-    { id: sessionData?.user?.id ? sessionData.user.id : "" },
-    { enabled: !!sessionData?.user?.id }
+  /* Using the `useQuery` hook from `@trpc/react` to fetch the user data from the server. */
+  const { data: userData, isLoading } = trpc.user.getUser.useQuery(
+    { id: sessionData?.user?.id ? sessionData.user.id : '' },
+    { enabled: !!sessionData?.user?.id },
   );
+  /* Using the `useQuery` hook from `@trpc/react` to fetch the todos from the server. */
   const { data: todos, isLoading: todosLoading } =
     trpc.todo.getTodos.useQuery();
+  /* This is using the `useMutation` hook from `@trpc/react` to create a new todo. */
   const { mutate: createTodoMutation } = trpc.todo.createTodo.useMutation({
+    /* Invalidating the cache for the `getTodos` query. */
     onSuccess: () => {
       utils.todo.getTodos.invalidate();
     },
@@ -37,10 +41,15 @@ const Dashboard: React.FC = () => {
   });
 
   const [parent] = useAutoAnimate<HTMLDivElement>({
-    easing: "ease-out",
+    easing: 'ease-out',
     duration: 350,
   });
 
+  /**
+   * OnSubmit is a function that takes in data, and then calls createTodoMutation with that data, and
+   * then calls reset.
+   * @param data - The data that was submitted by the user.
+   */
   const onSubmit: SubmitHandler<CreateTodo> = async (data) => {
     createTodoMutation(data);
     reset();
@@ -73,12 +82,12 @@ const Dashboard: React.FC = () => {
               className="w-full flex-1 rounded border-b-2 p-3 shadow-md focus:outline-none"
               type="text"
               placeholder="Add Todo"
-              {...register("title")}
+              {...register('title')}
             />
             <Button
               theme="success"
               size="large"
-              title={sessionData ? "Sign out" : "Sign in"}
+              title={sessionData ? 'Sign out' : 'Sign in'}
             >
               <div className="flex items-center gap-1">
                 <span>Add Todo</span>
@@ -88,9 +97,9 @@ const Dashboard: React.FC = () => {
           </form>
           {errors.title && (
             <p className="rounded bg-rose-200 p-2 text-sm text-rose-900">
-              {errors.title.type === "too_small"
-                ? "Todo must be at least 1 characters"
-                : "Todo must be at most 250 characters"}
+              {errors.title.type === 'too_small'
+                ? 'Todo must be at least 1 characters'
+                : 'Todo must be at most 250 characters'}
             </p>
           )}
           <div ref={parent} className="mt-8 flex flex-col gap-4">
@@ -105,7 +114,7 @@ const Dashboard: React.FC = () => {
           theme="danger"
           size="large"
           onClick={() => signOut()}
-          title={sessionData ? "Sign out" : "Sign in"}
+          title={sessionData ? 'Sign out' : 'Sign in'}
         ></Button>
       </main>
     </>
@@ -116,12 +125,12 @@ export default Dashboard;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { cookies } = ctx.req;
-  const session = cookies["next-auth.session-token"];
+  const session = cookies['next-auth.session-token'];
 
   if (!session) {
     return {
       redirect: {
-        destination: "/",
+        destination: '/',
         permanent: false,
       },
     };

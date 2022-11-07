@@ -1,7 +1,7 @@
-import type { GetServerSideProps, NextPage } from "next";
-import Head from "next/head";
-import { signIn, signOut, useSession } from "next-auth/react";
-import Button from "../components/ui/button";
+import type { GetServerSideProps, NextPage } from 'next';
+import Head from 'next/head';
+import Button from '../components/ui/button';
+import { signIn, signOut, useSession } from 'next-auth/react';
 
 const Home: NextPage = () => {
   return (
@@ -24,23 +24,24 @@ const Auth: React.FC = () => {
   return (
     <Button
       {...{
-        theme: "tertiary",
-        size: "large",
+        theme: 'tertiary',
+        size: 'large',
         onClick: () => signIn(),
-        title: "Sign in",
+        title: 'Sign in',
       }}
     />
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  /* Checking if the user has a session token. If they do, it redirects them to the dashboard. */
   const { cookies } = ctx.req;
-  const session = cookies["next-auth.session-token"];
+  const session = cookies['next-auth.session-token'];
 
   if (session) {
     return {
       redirect: {
-        destination: "/dashboard",
+        destination: '/dashboard',
         permanent: false,
       },
     };
